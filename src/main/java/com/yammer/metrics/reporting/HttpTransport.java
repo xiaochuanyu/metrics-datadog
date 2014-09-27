@@ -1,13 +1,20 @@
 package com.yammer.metrics.reporting;
 
+import com.yammer.metrics.reporting.model.DatadogCounter;
+import com.yammer.metrics.reporting.model.DatadogGauge;
+import com.yammer.metrics.reporting.serializer.JsonSerializer;
+import com.yammer.metrics.reporting.serializer.Serializer;
 import org.apache.http.entity.ContentType;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 
 import static org.apache.http.client.fluent.Request.*;
 
+/**
+ * Uses the datadog http webservie to push metrics.
+ *
+ * @see <a href="http://docs.datadoghq.com/api/">api docs</a>
+ */
 public class HttpTransport implements Transport {
 
   private final String seriesUrl;
@@ -21,25 +28,32 @@ public class HttpTransport implements Transport {
   }
 
   public static class HttpRequest implements Transport.Request {
+    protected final Serializer serializer;
 
-    private final HttpTransport transport;
-    private final ByteArrayOutputStream out;
+    protected final HttpTransport transport;
 
     public HttpRequest(HttpTransport transport) throws IOException {
       this.transport = transport;
-      this.out = new ByteArrayOutputStream();
+      serializer = new JsonSerializer();
+      serializer.startObject();
     }
 
-    public OutputStream getBodyWriter() {
-      return out;
+    public void init() throws IOException {
+    }
+
+    public void addGauge(DatadogGauge gauge) throws IOException {
+      serializer.appendGauge(gauge);
+    }
+
+    public void addCounter(DatadogCounter counter) throws IOException {
+      serializer.appendCounter(counter);
     }
 
     public void send() throws Exception {
-      this.out.flush();
-      this.out.close();
+      serializer.endObject();
       Post(this.transport.seriesUrl)
           .useExpectContinue()
-          .bodyString(out.toString("UTF-8"), ContentType.APPLICATION_JSON).execute()
+          .bodyString(serializer.getAsString(), ContentType.APPLICATION_JSON).execute()
           .discardContent();
     }
   }
