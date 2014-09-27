@@ -26,7 +26,6 @@ public class JsonSerializer implements Serializer {
   private ByteArrayOutputStream outputStream;
 
   public void startObject() throws IOException {
-    LOG.info("starting req");
     outputStream = new ByteArrayOutputStream();
     jsonOut = jsonFactory.createGenerator(outputStream);
     jsonOut.writeStartObject();
@@ -35,19 +34,14 @@ public class JsonSerializer implements Serializer {
   }
 
   public void appendGauge(DatadogGauge gauge) throws IOException {
-    LOG.info("adding gauge");
-
     mapper.writeValue(jsonOut, gauge);
   }
 
   public void appendCounter(DatadogCounter counter) throws IOException {
-    LOG.info("adding counter");
     mapper.writeValue(jsonOut, counter);
   }
 
   public void endObject() throws IOException {
-    LOG.info("ending req");
-
     jsonOut.writeEndArray();
     jsonOut.writeEndObject();
     jsonOut.flush();
@@ -58,6 +52,4 @@ public class JsonSerializer implements Serializer {
   public String getAsString() throws IOException {
     return outputStream.toString("UTF-8");
   }
-
-
 }
