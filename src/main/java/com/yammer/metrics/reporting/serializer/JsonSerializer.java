@@ -20,8 +20,7 @@ import java.io.UnsupportedEncodingException;
 public class JsonSerializer implements Serializer {
   private static final JsonFactory jsonFactory = new JsonFactory();
   private static final ObjectMapper mapper = new ObjectMapper(jsonFactory);
-  private static final Logger LOG = LoggerFactory
-      .getLogger(JsonSerializer.class);
+  private static final Logger LOG = LoggerFactory.getLogger(JsonSerializer.class);
 
   private JsonGenerator jsonOut;
   private ByteArrayOutputStream outputStream;

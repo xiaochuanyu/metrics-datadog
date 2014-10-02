@@ -11,7 +11,7 @@ import java.io.IOException;
 import static org.apache.http.client.fluent.Request.*;
 
 /**
- * Uses the datadog http webservie to push metrics.
+ * Uses the datadog http webservice to push metrics.
  *
  * @see <a href="http://docs.datadoghq.com/api/">API docs</a>
  */
