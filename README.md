@@ -23,10 +23,10 @@ Example of using UDP transport:
 
 ~~~scala
 ...
-val updTransport = new UdpTransport.Builder().build();
+val udpTransport = new UdpTransport.Builder().build()
 val reporter = 
     ...
-    .withTransport(updTransport)
+    .withTransport(udpTransport)
     ...
 ~~~
 

@@ -55,7 +55,6 @@ public class DatadogReporter extends AbstractPollingReporter implements
     try {
       try {
         request = transport.prepare();
-        request.init();
       } catch (IOException ioe) {
         LOG.error("Could not prepare request", ioe);
         return;
@@ -176,7 +175,7 @@ public class DatadogReporter extends AbstractPollingReporter implements
   private void pushCounter(String name, Long count, Long epoch) {
     DatadogCounter counter = new DatadogCounter(name, count, epoch, host, this.tags);
     try {
-        request.addCounter(counter);
+      request.addCounter(counter);
     } catch (Exception e) {
       LOG.error("Error writing counter", e);
     }
@@ -194,9 +193,19 @@ public class DatadogReporter extends AbstractPollingReporter implements
   private void sendGauge(String name, Number count, Long epoch) {
     DatadogGauge gauge = new DatadogGauge(name, count, epoch, host, this.tags);
     try {
-        request.addGauge(gauge);
+      request.addGauge(gauge);
     } catch (Exception e) {
       LOG.error("Error writing gauge", e);
+    }
+  }
+
+  @Override
+  public void shutdown() {
+    super.shutdown();
+    try {
+      transport.close();
+    } catch (IOException e) {
+      LOG.error("Error closing the datadog transport, ignored.", e);
     }
   }
 
@@ -273,7 +282,6 @@ public class DatadogReporter extends AbstractPollingReporter implements
      * Tags that would be sent to datadog with each and every metrics. This could be used to set global metrics
      * like version of the app, environment etc.
      * @param tags List of tags eg: [env:prod, version:1.0.1, name:kafka_client] etc
-     * @return
      */
     public Builder withTags(List<String> tags) {
         this.tags = tags;
@@ -306,8 +314,6 @@ public class DatadogReporter extends AbstractPollingReporter implements
      *
      * @see HttpTransport
      * @see com.yammer.metrics.reporting.transport.UdpTransport
-     * @param transport
-     * @return
      */
     public Builder withTransport(Transport transport) {
       this.transport = transport;
@@ -315,7 +321,7 @@ public class DatadogReporter extends AbstractPollingReporter implements
     }
 
     public DatadogReporter build() {
-      if(transport == null) {
+      if (transport == null) {
         this.transport = new HttpTransport(apiKey);
       }
       return new DatadogReporter(

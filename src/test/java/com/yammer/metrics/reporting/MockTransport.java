@@ -10,6 +10,9 @@ public class MockTransport implements Transport {
   public MockTransport() {
   }
 
+  public void close() throws IOException {
+  }
+
   public static class MockRequest extends HttpTransport.HttpRequest {
 
     public MockRequest(HttpTransport transport) throws IOException {

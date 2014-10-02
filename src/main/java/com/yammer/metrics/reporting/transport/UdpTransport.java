@@ -13,16 +13,16 @@ import java.io.IOException;
 /**
  * Uses dogstatsd UDP protocol to push metrics to datadog. Note that datadog doesn't support
  * time in the UDP protocol. So all metrics are against current time.
+ * <p/>
+ * Also dogstatsd UDP doesn't support batching of metrics, so it pushes metrics as it receives
+ * rather than batching.
  *
- * Also dogstatsd UDP doesn't support batching of metrics, so it pushes metrics as it receives rather
- * than batching.
  * @see <a href="http://docs.datadoghq.com/guides/dogstatsd">dogstatsd</a>
  */
 public class UdpTransport implements Transport {
 
-  private static final Logger LOG = LoggerFactory
-      .getLogger(UdpTransport.class);
-  private static StatsDClient statsd;
+  private static final Logger LOG = LoggerFactory.getLogger(UdpTransport.class);
+  private final StatsDClient statsd;
 
   private UdpTransport(String prefix, String statsdHost, int port, String[] globalTags) {
     statsd = new NonBlockingStatsDClient(
@@ -31,6 +31,10 @@ public class UdpTransport implements Transport {
         port,
         globalTags
     );
+  }
+
+  public void close() throws IOException {
+    statsd.stop();
   }
 
   public static class Builder {
@@ -69,16 +73,13 @@ public class UdpTransport implements Transport {
       this.statsdClient = statsdClient;
     }
 
-    public void init() {
-    }
-
     /**
      * statsd has no notion of batch request, so gauges are pushed as they are received
-     * @param gauge
      */
     public void addGauge(DatadogGauge gauge) {
       if (gauge.getPoints().size() > 1) {
-        LOG.debug("Gauge has more than one data point, will pick the first point only");
+        LOG.debug("Gauge " + gauge.getMetric() + " has more than one data point, " +
+            "will pick the first point only");
       }
       double value = gauge.getPoints().get(0).get(1).doubleValue();
       String[] tags = gauge.getTags().toArray(new String[gauge.getTags().size()]);
@@ -87,11 +88,11 @@ public class UdpTransport implements Transport {
 
     /**
      * statsd has no notion of batch request, so counters are pushed as they are received
-     * @param counter
      */
     public void addCounter(DatadogCounter counter) {
       if (counter.getPoints().size() > 1) {
-        LOG.debug("Counter has more than one data point, will pick the first point only");
+        LOG.debug("Counter " + counter.getMetric() + " has more than one data point, " +
+            "will pick the first point only");
       }
       int value = counter.getPoints().get(0).get(1).intValue();
       String[] tags = counter.getTags().toArray(new String[counter.getTags().size()]);

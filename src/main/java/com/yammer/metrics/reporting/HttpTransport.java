@@ -13,7 +13,7 @@ import static org.apache.http.client.fluent.Request.*;
 /**
  * Uses the datadog http webservie to push metrics.
  *
- * @see <a href="http://docs.datadoghq.com/api/">api docs</a>
+ * @see <a href="http://docs.datadoghq.com/api/">API docs</a>
  */
 public class HttpTransport implements Transport {
 
@@ -27,6 +27,9 @@ public class HttpTransport implements Transport {
     return new HttpRequest(this);
   }
 
+  public void close() throws IOException {
+  }
+
   public static class HttpRequest implements Transport.Request {
     protected final Serializer serializer;
 
@@ -36,9 +39,6 @@ public class HttpTransport implements Transport {
       this.transport = transport;
       serializer = new JsonSerializer();
       serializer.startObject();
-    }
-
-    public void init() throws IOException {
     }
 
     public void addGauge(DatadogGauge gauge) throws IOException {

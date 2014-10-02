@@ -5,6 +5,12 @@ import com.yammer.metrics.reporting.model.DatadogGauge;
 
 import java.io.IOException;
 
+/**
+ * This defines the interface to build a datadog request body.
+ * The call order is expected to be:
+ *   startObject() -> One or more of appendGauge/appendCounter -> endObject()
+ * Note that this is a single-use class and nothing can be appended once endObject() is called.
+ */
 public interface Serializer {
 
   /**
@@ -13,29 +19,22 @@ public interface Serializer {
   public void startObject() throws IOException;
 
   /**
-   * Append a guauge to the time series
-   * @param gauge
-   * @throws IOException
+   * Append a gauge to the time series
    */
   public void appendGauge(DatadogGauge gauge) throws IOException;
 
   /**
    * Append a counter to the time series
-   * @param counter
-   * @throws IOException
    */
   public void appendCounter(DatadogCounter counter) throws IOException;
 
   /**
    * Mark ending of the datadog time series object
-   * @throws IOException
    */
   public void endObject() throws IOException;
 
   /**
    * Get datadog time series object serialized as a string
-   * @return
-   * @throws IOException
    */
   public String getAsString() throws IOException;
 }

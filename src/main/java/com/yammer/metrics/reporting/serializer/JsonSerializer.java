@@ -10,11 +10,12 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 /**
  * Serialize datadog time series object into json
  *
- * @see <a href="http://docs.datadoghq.com/api/">api docs</a>
+ * @see <a href="http://docs.datadoghq.com/api/">API docs</a>
  */
 public class JsonSerializer implements Serializer {
   private static final JsonFactory jsonFactory = new JsonFactory();
@@ -26,7 +27,7 @@ public class JsonSerializer implements Serializer {
   private ByteArrayOutputStream outputStream;
 
   public void startObject() throws IOException {
-    outputStream = new ByteArrayOutputStream();
+    outputStream = new ByteArrayOutputStream(2048);
     jsonOut = jsonFactory.createGenerator(outputStream);
     jsonOut.writeStartObject();
     jsonOut.writeFieldName("series");
@@ -45,11 +46,10 @@ public class JsonSerializer implements Serializer {
     jsonOut.writeEndArray();
     jsonOut.writeEndObject();
     jsonOut.flush();
-    outputStream.flush();
     outputStream.close();
   }
 
-  public String getAsString() throws IOException {
+  public String getAsString() throws UnsupportedEncodingException {
     return outputStream.toString("UTF-8");
   }
 }
