@@ -60,7 +60,7 @@ metric names while passing through the Metrics library. The tags are unpacked
 by `metrics-datadog` at reporting time and are sent along to Datadog via the
 configured transport layer. Here's the metric name syntax:
 
-`[tagName:tagValue,tagName:tagValue,...]`
+`metricName[tagName:tagValue,tagName:tagValue,...]`
 
 `metrics-datadog` is mainly a reporting library and doesn't currently 
 implement a tag-aware decorator on top of the core `Metrics` API. It
