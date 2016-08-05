@@ -1,9 +1,9 @@
-package org.coursera.metrics.datadog.transport;
+package org.coursera.metrics.datadog;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import io.dropwizard.jackson.Discoverable;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
-public interface AbstractTransportFactory extends Discoverable {
-  public Transport build();
+public interface MetricNameFormatterFactory extends Discoverable {
+  public MetricNameFormatter build();
 }
