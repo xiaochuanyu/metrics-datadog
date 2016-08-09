@@ -241,7 +241,7 @@ public class CustomMetricNameFormatter extends DefaultMetricNameFormatter {
   }
 }
 ~~~
-##### 2. Create a MetricNameFormatterFactory
+##### 2. Create a MetricNameFormatterFactory with `@JsonTypeName` annotation
 
 ~~~java
 @JsonTypeName("custom") // This must match the name specified in the configuration
@@ -253,7 +253,7 @@ public class CustomMetricNameFormatterFactory implements MetricNameFormatterFact
 }
 ~~~
 
-##### 3. Add your factory to the discoverable subTypes of MetricNameFormatterFactory
+##### 3. Add the Factory to `org.coursera.metrics.datadog.MetricNameFormatterFactory` file
 
 We need to make sure our `CustomMetricNameFormatterFactory` is added to the list of subTypes
 for `MetricNameFormatterFactory`, otherwise the `"custom"` in our config won't be recognized.
@@ -263,6 +263,16 @@ Add a file called `org.coursera.metrics.datadog.MetricNameFormatterFactory` to
 (e.g. `com.company.CustomMetricNameFormatterFactory`)
 
 See: http://www.dropwizard.io/1.0.0/docs/manual/configuration.html#polymorphic-configuration for details
+
+#### Dynamic Tags Callback
+
+Similar to the `MetricNameFormatter` steps, we need to:
+
+1. Create a DynamicTagsCallback
+2. Create a DynamicTagsCallbackFactory with `@JsonTypeName` annotation
+3. Add the Factory to `org.coursera.metrics.datadog.DynamicTagsCallbackFactory` file
+
+See above instructions for details.
 
 ## Maven Info
 
