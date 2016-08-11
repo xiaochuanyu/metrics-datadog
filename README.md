@@ -100,7 +100,7 @@ First, add the `dropwizard-metrics-datadog` dependency in your POM:
     <dependency>
         <groupId>org.coursera</groupId>
         <artifactId>dropwizard-metrics-datadog</artifactId>
-        <version>1.1.2</version>
+        <version>1.1.6</version>
     </dependency>
 ~~~
 
@@ -115,6 +115,10 @@ metrics:
       tags:                                 # Optional. Defaults to (empty)
       includes:                             # Optional. Defaults to (all).
       excludes:                             # Optional. Defaults to (none).
+      prefix:                               # Optional. Defaults to (none).
+      expansions:                           # Optional. Defaults to (all).
+      metricNameFormatter:                  # Optional. Default is "default".
+      dynamicTagsCallback:                  # Optional. Defaults to (none).
       transport:
         type: http
         apiKey: <apiKey>
@@ -176,6 +180,100 @@ The check is very simplistic so be as specific as possible. For example, if
 you have "jvm.", the filter will check if the includes has that value in any 
 part of the metric name (not just the beginning).
 
+#### Expansions
+
+If you want to limit the set of expansions applied to each metric, you can specify
+a custom set.
+
+The full set of expansions can be found in the [Expansion enum](https://github.com/coursera/metrics-datadog/blob/master/metrics-datadog/src/main/java/org/coursera/metrics/datadog/DatadogReporter.java#L232).
+
+~~~yaml
+metrics:
+  reporters:
+    - type: datadog
+      expansions:
+        - COUNT
+        - RATE_1_MINUTE
+        - MAX
+        - P95
+~~~
+
+#### Prefix
+
+By default, the metric names are sent as-is (e.g. `io.dropwizard.jetty.MutableServletContextHandler.2xx-responses`)
+The prefix option adds a custom prefix to each metric name:
+
+~~~yaml
+metrics:
+  reporters:
+    - type: datadog
+      prefix: custom.prefix
+~~~
+
+would produce: `custom.prefix.io.dropwizard.jetty.MutableServletContextHandler.2xx-responses`
+
+#### Metric Name Formatter
+
+The metricNameFormatter option can be used to add custom logic when processing each
+metric's name. By default it will use the DefaultMetricNameFormatter which handles
+Datadog tags but does not modify the metric name.
+
+~~~yaml
+metrics:
+  reporters:
+    - type: datadog
+      metricNameFormatter: custom
+~~~
+
+Adding a custom formatter requires a few things:
+
+##### 1. Create a MetricNameFormatter
+
+~~~java
+public class CustomMetricNameFormatter extends DefaultMetricNameFormatter {
+  @Override
+  public String format(String name, String... path) {
+    // Make response metrics names less verbose
+    String newName = name.replace("io.dropwizard.jetty.MutableServletContextHandler", "");
+    
+    // Call DefaultMetricNameFormatter to handle tags
+    return super.format(newName, path);
+  }
+}
+~~~
+##### 2. Create a MetricNameFormatterFactory with `@JsonTypeName` annotation
+
+~~~java
+@JsonTypeName("custom") // This must match the name specified in the configuration
+public class CustomMetricNameFormatterFactory implements MetricNameFormatterFactory {
+  @Override
+  public MetricNameFormatter build() {
+    return new CustomMetricNameFormatter();
+  }
+}
+~~~
+
+##### 3. Add the Factory to `org.coursera.metrics.datadog.MetricNameFormatterFactory` file
+
+We need to make sure our `CustomMetricNameFormatterFactory` is added to the list of subTypes
+for `MetricNameFormatterFactory`, otherwise the `"custom"` in our config won't be recognized.
+
+Add a file called `org.coursera.metrics.datadog.MetricNameFormatterFactory` to
+`src/main/resources/META-INF/services` and add the full path to your class to the file
+(e.g. `com.company.CustomMetricNameFormatterFactory`)
+
+See: http://www.dropwizard.io/1.0.0/docs/manual/configuration.html#polymorphic-configuration for details
+
+#### Dynamic Tags Callback
+
+Similar to the `MetricNameFormatter` steps, we need to:
+
+1. Create a DynamicTagsCallback
+2. Create a DynamicTagsCallbackFactory with `@JsonTypeName` annotation
+3. Add the Factory to `org.coursera.metrics.datadog.DynamicTagsCallbackFactory` file
+
+See above instructions for details.
+
 ## Maven Info
 
 Metrics datadog reporter is available as an artifact on
@@ -183,14 +281,14 @@ Metrics datadog reporter is available as an artifact on
 
 * Group: org.coursera
 * Artifact: metrics-datadog
-* Version: 1.1.2
+* Version: 1.1.6
 
 Dropwizard datadog reporter is available as an artifact on
 [Maven Central](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22org.coursera%22%20AND%20a%3A%22dropwizard-metrics-datadog%22)
 
 * Group: org.coursera
 * Artifact: dropwizard-metrics-datadog
-* Version: 1.1.2
+* Version: 1.1.6
 
 ## Contributing
 
