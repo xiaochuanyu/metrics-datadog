@@ -1,5 +1,10 @@
 # Metrics Datadog Reporter
-Simple Metrics reporter that sends reporting info to Datadog, supports both HTTP and UDP.
+
+`metrics-datadog` is a simple reporting bridge between [Dropwizard Metrics](http://metrics.dropwizard.io/) and the [Datadog](https://www.datadoghq.com/) service. It includes support for:
+
+* Datadog's tagging feature
+* Metric reporting via either UDP (dogstatsd) or the Datadog HTTP API
+* Tight integration with the Dropwizard framework via the `dropwizard-metrics-datadog` sub-project.
 
 ## UDP vs HTTP
 
