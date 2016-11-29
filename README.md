@@ -298,4 +298,4 @@ Dropwizard datadog reporter is available as an artifact on
 ## Contributing
 
 We follow Google's [Java Code
-Style](https://google-styleguide.googlecode.com/svn/trunk/javaguide.html)
+Style](https://google.github.io/styleguide/javaguide.html)
