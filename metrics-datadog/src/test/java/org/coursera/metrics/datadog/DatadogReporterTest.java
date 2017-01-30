@@ -153,6 +153,29 @@ public class DatadogReporterTest {
   }
 
   @Test
+  public void reportsGaugeValues_ThrowsException_OtherMetricsWillBeReported() throws Exception {
+    final Gauge gauge = mock(Gauge.class);
+    when(gauge.getValue()).thenThrow(new IllegalArgumentException("error occurred during retrieving value"));
+    final Counter counter = mock(Counter.class);
+    when(counter.getCount()).thenReturn(100L);
+
+    reporter.report(map("gauge", gauge),
+                    this.<Counter>map("counter", counter),
+                    this.<Histogram>map(),
+                    this.<Meter>map(),
+                    this.<Timer>map());
+
+    final InOrder inOrder = inOrder(transport, request);
+    inOrder.verify(transport).prepare();
+    inOrder.verify(request).addGauge(new DatadogGauge("counter", 100L, timestamp, HOST, tags));
+    inOrder.verify(request).send();
+
+    verify(transport).prepare();
+    verify(request).send();
+    verifyNoMoreInteractions(transport, request);
+  }
+
+  @Test
   public void reportsCounters() throws Exception {
     final Counter counter = mock(Counter.class);
     when(counter.getCount()).thenReturn(100L);

@@ -201,12 +201,19 @@ public class DatadogReporter extends ScheduledReporter {
         timestamp, host, tags));
   }
 
-  private void reportGauge(String name, Gauge gauge, long timestamp, List<String> tags)
-      throws IOException {
-    final Number value = toNumber(gauge.getValue());
-    if (value != null) {
-      request.addGauge(new DatadogGauge(metricNameFormatter.format(name), value, timestamp, host,
-          tags));
+  // Gauges are the only metrics which can throw exceptions. With a thrown exception all
+  // other metrics will not be reported to Datadog.
+  private void reportGauge(String name, Gauge gauge, long timestamp, List<String> tags) {
+    try {
+      final Number value = toNumber(gauge.getValue());
+      if (value != null) {
+        request.addGauge(new DatadogGauge(metricNameFormatter.format(name), value, timestamp, host,
+                tags));
+      }
+    } catch (Exception exception) {
+      String errorMessage = String.format("Error reporting gauge metrics (name: %s, tags: %s) to Datadog, " +
+              "continuing reporting other metrics.", name, tags);
+      LOG.error(errorMessage, exception);
     }
   }
 
