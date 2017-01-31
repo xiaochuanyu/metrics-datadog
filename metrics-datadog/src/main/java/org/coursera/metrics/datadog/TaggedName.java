@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 
 public class TaggedName {
   private static final Pattern tagPattern = Pattern
-      .compile("([\\w\\.]+)\\[([\\w\\W]+)\\]");
+      .compile("([\\w\\.-]+)\\[([\\w\\W]+)\\]");
 
   private final String metricName;
   private final List<String> encodedTags;

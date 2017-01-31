@@ -75,6 +75,33 @@ public class TaggedNameTest {
   }
 
   @Test
+  public void testDecodeTwoTagsDotted() throws Exception {
+    TaggedName tn = TaggedName.decode("my.metric.name[key.1:val.1,key.2]");
+    assertEquals("my.metric.name", tn.getMetricName());
+    assertEquals(2, tn.getEncodedTags().size());
+    assertEquals("key.1:val.1", tn.getEncodedTags().get(0));
+    assertEquals("key.2", tn.getEncodedTags().get(1));
+  }
+
+  @Test
+  public void testDecodeTwoTagsDashed() throws Exception {
+    TaggedName tn = TaggedName.decode("my-metric-name[key-1:val-1,key-2]");
+    assertEquals("my-metric-name", tn.getMetricName());
+    assertEquals(2, tn.getEncodedTags().size());
+    assertEquals("key-1:val-1", tn.getEncodedTags().get(0));
+    assertEquals("key-2", tn.getEncodedTags().get(1));
+  }
+
+  @Test
+  public void testDecodeTwoTagsUnderscored() throws Exception {
+    TaggedName tn = TaggedName.decode("my_metric_name[key_1:val_1,key_2]");
+    assertEquals("my_metric_name", tn.getMetricName());
+    assertEquals(2, tn.getEncodedTags().size());
+    assertEquals("key_1:val_1", tn.getEncodedTags().get(0));
+    assertEquals("key_2", tn.getEncodedTags().get(1));
+  }
+
+  @Test
   public void testDecodeInvalidEncodings() throws Exception {
     // note that parsing could be stricter, but we're relaxing things to
     // maintain backward compatibility with prior parsing logic
