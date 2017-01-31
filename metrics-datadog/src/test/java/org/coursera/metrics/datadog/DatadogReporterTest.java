@@ -153,7 +153,7 @@ public class DatadogReporterTest {
   }
 
   @Test
-  public void reportsGaugeValues_ThrowsException_OtherMetricsWillBeReported() throws Exception {
+  public void reportHandlesGaugeMetricExceptions() throws Exception {
     final Gauge gauge = mock(Gauge.class);
     when(gauge.getValue()).thenThrow(new IllegalArgumentException("error occurred during retrieving value"));
     final Counter counter = mock(Counter.class);
